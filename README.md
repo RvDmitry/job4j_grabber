@@ -2,4 +2,4 @@
 [![codecov](https://codecov.io/gh/RvDmitry/job4j_grabber/branch/master/graph/badge.svg)](https://codecov.io/gh/RvDmitry/job4j_grabber)
 
 # job4j_grabber
-Проект job4j_grabber
+Проект - Агрегатор вакансий
