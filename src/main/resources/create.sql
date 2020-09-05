@@ -1,0 +1,1 @@
+create table rabbit(id serial PRIMARY key, create_date timestamp);
