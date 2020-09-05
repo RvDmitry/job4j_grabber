@@ -22,17 +22,13 @@ import static org.quartz.SimpleScheduleBuilder.*;
  */
 public class AlertRabbit {
     /**
-     * В поле записываются данные приложения.
-     */
-    private static Properties property = new Properties();
-
-    /**
      * Главный метод программы. Создается планировщик и задача которую он должен выполнить.
      * Временной интервал считывается из файла свойст.
      * @param args Параметры командной строки
      */
     public static void main(String[] args) {
         String config = "rabbit.properties";
+        Properties property = new Properties();
         try (InputStream input = AlertRabbit.class.getClassLoader().getResourceAsStream(config)) {
             property.load(input);
             Class.forName(property.getProperty("db.driver"));
