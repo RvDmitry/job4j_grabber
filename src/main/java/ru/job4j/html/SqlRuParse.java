@@ -25,14 +25,16 @@ public class SqlRuParse {
      * @throws Exception Исключение
      */
     public static void main(String[] args) throws Exception {
-        Document doc = Jsoup.connect("https://www.sql.ru/forum/job-offers").get();
-        Elements row = doc.select(".postslisttopic");
-        for (Element td : row) {
-            Element href = td.child(0);
-            Element time = td.parent().child(5);
-            System.out.println(href.attr("href"));
-            System.out.println(href.text());
-            System.out.println(parse(time.text()));
+        for (int i = 1; i <= 5; i++) {
+            Document doc = Jsoup.connect("https://www.sql.ru/forum/job-offers/" + i).get();
+            Elements row = doc.select(".postslisttopic");
+            for (Element td : row) {
+                Element href = td.child(0);
+                Element time = td.parent().child(5);
+                System.out.println(href.attr("href"));
+                System.out.println(href.text());
+                System.out.println(parse(time.text()));
+            }
         }
     }
 
