@@ -3,12 +3,14 @@ package ru.job4j.html;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.jsoup.nodes.TextNode;
 import org.jsoup.select.Elements;
 
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.StringJoiner;
 
 /**
  * Class SqlRuParse
@@ -36,6 +38,46 @@ public class SqlRuParse {
                 System.out.println(parse(time.text()));
             }
         }
+        Post post = extract("https://www.sql.ru/forum/1325330/"
+                + "lidy-be-fe-senior-cistemnye-analitiki-qa-i-devops-moskva-do-200t");
+        System.out.println(System.lineSeparator() + post.getLink());
+        System.out.println(post.getTitle());
+        System.out.println(post.getDescription());
+        System.out.println(post.getDate());
+    }
+
+    /**
+     * Метод осуществляет извлечение информации из поста через переданную ссылку на данный пост.
+     * Извлекается заголовок поста, его содержание, дата создания поста.
+     * Из полученной информации собирается и вовзращается объект Post.
+     * @param url Ссылка на пост
+     * @return Объект Post
+     * @throws Exception Исключение
+     */
+    public static Post extract(String url) throws Exception {
+        Post post = new Post();
+        StringJoiner join = new StringJoiner(System.lineSeparator());
+        Document doc = Jsoup.connect(url).get();
+        Elements header = doc.select(".messageHeader");
+        String title = header.get(0).textNodes().get(0).text();
+        Elements bodies = doc.select(".msgBody");
+        Element body = bodies.get(1);
+        for (var element : body.childNodes()) {
+            if (element instanceof TextNode) {
+                join.add(((TextNode) element).text());
+            } else {
+                for (TextNode node : ((Element) element).textNodes()) {
+                    join.add(node.text());
+                }
+            }
+        }
+        String footer = doc.selectFirst(".msgFooter").textNodes().get(0).text();
+        String date = footer.replaceAll("[\\[]", "");
+        post.setTitle(title);
+        post.setDescription(join.toString());
+        post.setLink(url);
+        post.setDate(parse(date));
+        return post;
     }
 
     /**
