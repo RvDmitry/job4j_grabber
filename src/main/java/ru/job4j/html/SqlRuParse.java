@@ -65,7 +65,7 @@ public class SqlRuParse {
         for (var element : body.childNodes()) {
             if (element instanceof TextNode) {
                 join.add(((TextNode) element).text());
-            } else {
+            } else if (element instanceof Element) {
                 for (TextNode node : ((Element) element).textNodes()) {
                     join.add(node.text());
                 }
