@@ -6,10 +6,13 @@ import org.jsoup.nodes.Element;
 import org.jsoup.nodes.TextNode;
 import org.jsoup.select.Elements;
 
+import java.io.IOException;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.StringJoiner;
 
 /**
@@ -18,46 +21,58 @@ import java.util.StringJoiner;
  * @author Dmitry Razumov
  * @version 1
  */
-public class SqlRuParse {
+public class SqlRuParse implements Parse {
     /**
      * Главный метод программы.
-     * Загружается страница с сайта вакансий.
-     * Выводится информация о вакансиях.
      * @param args Параметры командной строки
-     * @throws Exception Исключение
      */
-    public static void main(String[] args) throws Exception {
-        for (int i = 1; i <= 5; i++) {
-            Document doc = Jsoup.connect("https://www.sql.ru/forum/job-offers/" + i).get();
-            Elements row = doc.select(".postslisttopic");
-            for (Element td : row) {
-                Element href = td.child(0);
-                Element time = td.parent().child(5);
-                System.out.println(href.attr("href"));
-                System.out.println(href.text());
-                System.out.println(parse(time.text()));
-            }
+    public static void main(String[] args) {
+        List<Post> posts = new SqlRuParse().list("https://www.sql.ru/forum/job-offers");
+        posts.stream().map(post -> post.getTitle() + " /дата поста: " + post.getDate())
+                .forEach(System.out::println);
+    }
+
+    /**
+     * Метод осуществляет парсинг сайта вакансий sql.ru. Формирует список постов.
+     * @param link Ссылка на страницу постов
+     * @return Список постов
+     */
+    @Override
+    public List<Post> list(String link) {
+        List<Post> posts = new ArrayList<>();
+        Document doc;
+        try {
+            doc = Jsoup.connect(link).get();
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new IllegalStateException("Ошибка загрузки списка постов со страницы вакансий.");
         }
-        Post post = extract("https://www.sql.ru/forum/1325330/"
-                + "lidy-be-fe-senior-cistemnye-analitiki-qa-i-devops-moskva-do-200t");
-        System.out.println(System.lineSeparator() + post.getLink());
-        System.out.println(post.getTitle());
-        System.out.println(post.getDescription());
-        System.out.println(post.getDate());
+        Elements row = doc.select(".postslisttopic");
+        for (Element td : row) {
+            Element href = td.child(0);
+            posts.add(detail(href.attr("href")));
+        }
+        return posts;
     }
 
     /**
      * Метод осуществляет извлечение информации из поста через переданную ссылку на данный пост.
      * Извлекается заголовок поста, его содержание, дата создания поста.
      * Из полученной информации собирается и вовзращается объект Post.
-     * @param url Ссылка на пост
+     * @param link Ссылка на пост
      * @return Объект Post
-     * @throws Exception Исключение
      */
-    public static Post extract(String url) throws Exception {
+    @Override
+    public Post detail(String link) {
         Post post = new Post();
         StringJoiner join = new StringJoiner(System.lineSeparator());
-        Document doc = Jsoup.connect(url).get();
+        Document doc;
+        try {
+            doc = Jsoup.connect(link).get();
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new IllegalStateException("Ошибка загрузки деталей поста.");
+        }
         Elements header = doc.select(".messageHeader");
         String title = header.get(0).textNodes().get(0).text();
         Elements bodies = doc.select(".msgBody");
@@ -65,7 +80,7 @@ public class SqlRuParse {
         for (var element : body.childNodes()) {
             if (element instanceof TextNode) {
                 join.add(((TextNode) element).text());
-            } else {
+            } else if (element instanceof Element) {
                 for (TextNode node : ((Element) element).textNodes()) {
                     join.add(node.text());
                 }
@@ -75,7 +90,7 @@ public class SqlRuParse {
         String date = footer.replaceAll("[\\[]", "");
         post.setTitle(title);
         post.setDescription(join.toString());
-        post.setLink(url);
+        post.setLink(link);
         post.setDate(parse(date));
         return post;
     }
@@ -85,9 +100,8 @@ public class SqlRuParse {
      * с целью дальнейшей возможности записи даты в базу данных.
      * @param time Дата и время в формате сайта
      * @return Дата и время в формате Timestamp
-     * @throws ParseException Исключение, при неудачном преобразовании даты и времени
      */
-    private static Timestamp parse(String time) throws ParseException {
+    private Timestamp parse(String time) {
         String today = "сегодня";
         String yesterday = "вчера";
         String fullTime = "";
@@ -110,7 +124,13 @@ public class SqlRuParse {
                     new SimpleDateFormat("dd MMMM yy")
                             .format(new Date(System.currentTimeMillis() - 24 * 60 * 60 * 1000)));
         }
-        Date date = formatter.parse(fullTime);
+        Date date;
+        try {
+            date = formatter.parse(fullTime);
+        } catch (ParseException e) {
+            e.printStackTrace();
+            throw new IllegalStateException("Ошибка преобразования времени.");
+        }
         return new Timestamp(date.getTime());
     }
 }
