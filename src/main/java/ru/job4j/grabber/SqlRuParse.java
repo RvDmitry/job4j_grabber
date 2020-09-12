@@ -3,7 +3,6 @@ package ru.job4j.grabber;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import org.jsoup.nodes.TextNode;
 import org.jsoup.select.Elements;
 
 import java.io.IOException;
@@ -13,7 +12,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.StringJoiner;
 
 /**
  * Class SqlRuParse
@@ -65,7 +63,6 @@ public class SqlRuParse implements Parse {
     @Override
     public Post detail(String link) {
         Post post = new Post();
-        StringJoiner join = new StringJoiner(System.lineSeparator());
         Document doc;
         try {
             doc = Jsoup.connect(link).get();
@@ -77,19 +74,14 @@ public class SqlRuParse implements Parse {
         String title = header.get(0).textNodes().get(0).text();
         Elements bodies = doc.select(".msgBody");
         Element body = bodies.get(1);
-        for (var element : body.childNodes()) {
-            if (element instanceof TextNode) {
-                join.add(((TextNode) element).text());
-            } else if (element instanceof Element) {
-                for (TextNode node : ((Element) element).textNodes()) {
-                    join.add(node.text());
-                }
-            }
-        }
         String footer = doc.selectFirst(".msgFooter").textNodes().get(0).text();
         String date = footer.replaceAll("[\\[]", "");
+        String str = body.toString().replace("<br>", System.lineSeparator());
+        while (str.contains("<")) {
+            str = str.replace(str.substring(str.indexOf('<'), str.indexOf('>') + 1), "");
+        }
         post.setTitle(title);
-        post.setDescription(join.toString());
+        post.setDescription(str);
         post.setLink(link);
         post.setDate(parse(date));
         return post;
