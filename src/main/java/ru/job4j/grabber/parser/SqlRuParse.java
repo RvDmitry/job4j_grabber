@@ -1,9 +1,10 @@
-package ru.job4j.grabber;
+package ru.job4j.grabber.parser;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import ru.job4j.grabber.model.Post;
 
 import java.io.IOException;
 import java.sql.Timestamp;

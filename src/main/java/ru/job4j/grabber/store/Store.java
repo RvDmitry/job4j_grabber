@@ -1,4 +1,6 @@
-package ru.job4j.grabber;
+package ru.job4j.grabber.store;
+
+import ru.job4j.grabber.model.Post;
 
 import java.util.List;
 
@@ -20,4 +22,11 @@ public interface Store {
      * @return Список объявлений
      */
     List<Post> getAll();
+
+    /**
+     * Метод осуществляет поиск объявления по его ИД.
+     * @param id идентификационный номер
+     * @return Объявление
+     */
+    Post findById(String id);
 }
