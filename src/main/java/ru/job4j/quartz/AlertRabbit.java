@@ -27,7 +27,7 @@ public class AlertRabbit {
      * @param args Параметры командной строки
      */
     public static void main(String[] args) {
-        String config = "rabbit.properties";
+        String config = "app.properties";
         Properties property = new Properties();
         try (InputStream input = AlertRabbit.class.getClassLoader().getResourceAsStream(config)) {
             property.load(input);

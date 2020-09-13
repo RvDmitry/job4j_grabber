@@ -123,7 +123,7 @@ public class PsqlStore implements Store, AutoCloseable {
      * @param args Параметры командной строки
      */
     public static void main(String[] args) {
-        String config = "rabbit.properties";
+        String config = "app.properties";
         Properties cfg = new Properties();
         try (InputStream input = PsqlStore.class.getClassLoader().getResourceAsStream(config)) {
             cfg.load(input);
