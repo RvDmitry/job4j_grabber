@@ -76,7 +76,7 @@ public class SqlRuParse implements Parse {
         Elements bodies = doc.select(".msgBody");
         Element body = bodies.get(1);
         String footer = doc.selectFirst(".msgFooter").textNodes().get(0).text();
-        String date = footer.replaceAll("[\\[]", "");
+        String date = footer.replace("[\\[]", "");
         String str = body.toString().replace("<br>", System.lineSeparator());
         while (str.contains("<")) {
             str = str.replace(str.substring(str.indexOf('<'), str.indexOf('>') + 1), "");
