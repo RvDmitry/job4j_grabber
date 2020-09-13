@@ -41,19 +41,29 @@ public class PsqlStore implements Store, AutoCloseable {
     /**
      * Метод сохраняет объявление в базе.
      * @param post Объявление
+     * @return идентификатор сгенерированный базой данных
      */
     @Override
-    public void save(Post post) {
+    public int save(Post post) {
+        int key = 0;
         try (PreparedStatement st = cnn.prepareStatement(
-                "insert into post(name, text, link, created) values(?, ?, ?, ?)")) {
+                "insert into post(name, text, link, created) values(?, ?, ?, ?)",
+                Statement.RETURN_GENERATED_KEYS)) {
             st.setString(1, post.getTitle());
             st.setString(2, post.getDescription());
             st.setString(3, post.getLink());
             st.setTimestamp(4, new Timestamp(post.getDate().getTime()));
             st.executeUpdate();
+            ResultSet rs = st.getGeneratedKeys();
+            key = rs.next() ? rs.getInt(1) : 0;
+        } catch (SQLFeatureNotSupportedException e) {
+            e.printStackTrace();
+            throw new IllegalStateException("Сгенерированный базой ИД не может быть возвращен.");
         } catch (SQLException e) {
             e.printStackTrace();
+            throw new IllegalStateException("Ошибка записи в базу.");
         }
+        return key;
     }
 
     /**
@@ -75,7 +85,7 @@ public class PsqlStore implements Store, AutoCloseable {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            throw new IllegalStateException("Ошибка поиска объявлений");
+            throw new IllegalStateException("Ошибка поиска объявлений.");
         }
         return posts;
     }
@@ -101,7 +111,7 @@ public class PsqlStore implements Store, AutoCloseable {
             rs.close();
         } catch (Exception e) {
             e.printStackTrace();
-            throw new IllegalStateException("Ошибка поиска объявления");
+            throw new IllegalStateException("Ошибка поиска объявления.");
         }
         return post;
     }
