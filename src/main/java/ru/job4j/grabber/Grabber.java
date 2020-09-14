@@ -9,6 +9,8 @@ import ru.job4j.grabber.store.PsqlStore;
 import ru.job4j.grabber.store.Store;
 
 import java.io.*;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.util.List;
 import java.util.Properties;
 
@@ -104,6 +106,36 @@ public class Grabber implements Grab {
     }
 
     /**
+     * Метод загружает объявления из базы данных и отправляет их серверу.
+     * Сервер выводит полученые данные на странице браузера по указанному порту.
+     * @param store Хранилище из которого нужно загрузить объявления
+     */
+    public void web(Store store) {
+        new Thread(() -> {
+            try (ServerSocket server = new ServerSocket(
+                    Integer.parseInt(cfg.getProperty("port"))
+            )) {
+                while (!server.isClosed()) {
+                    Socket socket = server.accept();
+                    try (OutputStream out = socket.getOutputStream()) {
+                        out.write("HTTP/1.1 200 OK\r\n\r\n".getBytes());
+                        for (Post post : store.getAll()) {
+                            out.write(post.toString().getBytes("CP1251"));
+                            for (int i = 0; i < 5; i++) {
+                                out.write(System.lineSeparator().getBytes());
+                            }
+                        }
+                    } catch (IOException io) {
+                        io.printStackTrace();
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }).start();
+    }
+
+    /**
      * Главный метод программы. Запускает планировщик заданий.
      * @param args Параметры командной строки
      * @throws Exception Исключение
@@ -114,5 +146,6 @@ public class Grabber implements Grab {
         Scheduler scheduler = grab.scheduler();
         Store store = grab.store();
         grab.init(new SqlRuParse(), store, scheduler);
+        grab.web(store);
     }
 }
