@@ -41,13 +41,11 @@ public class PsqlStore implements Store, AutoCloseable {
     /**
      * Метод сохраняет объявление в базе.
      * @param post Объявление
-     * @return идентификатор сгенерированный базой данных
      */
     @Override
-    public int save(Post post) {
-        int key = 0;
+    public void save(Post post) {
         try (PreparedStatement st = cnn.prepareStatement(
-                "insert into post(name, text, link, created) values(?, ?, ?, ?)",
+                "insert into posts(name, text, link, created) values(?, ?, ?, ?)",
                 Statement.RETURN_GENERATED_KEYS)) {
             st.setString(1, post.getTitle());
             st.setString(2, post.getDescription());
@@ -55,11 +53,12 @@ public class PsqlStore implements Store, AutoCloseable {
             st.setTimestamp(4, new Timestamp(post.getDate().getTime()));
             st.executeUpdate();
             ResultSet rs = st.getGeneratedKeys();
-            key = rs.next() ? rs.getInt(1) : 0;
+            if (rs.next()) {
+                post.setId(rs.getInt(1));
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return key;
     }
 
     /**
@@ -70,9 +69,10 @@ public class PsqlStore implements Store, AutoCloseable {
     public List<Post> getAll() {
         List<Post> posts = new ArrayList<>();
         try (Statement st = cnn.createStatement();
-             ResultSet rs = st.executeQuery("select * from post")) {
+             ResultSet rs = st.executeQuery("select * from posts")) {
             while (rs.next()) {
                 Post post = new Post();
+                post.setId(rs.getInt("id"));
                 post.setTitle(rs.getString("name"));
                 post.setDescription(rs.getString("text"));
                 post.setLink(rs.getString("link"));
@@ -93,11 +93,12 @@ public class PsqlStore implements Store, AutoCloseable {
     @Override
     public Post findById(String id) {
         Post post = null;
-        try (PreparedStatement st = cnn.prepareStatement("select * from post where id = ?")) {
+        try (PreparedStatement st = cnn.prepareStatement("select * from posts where id = ?")) {
             st.setInt(1, Integer.parseInt(id));
             ResultSet rs = st.executeQuery();
             if (rs.next()) {
                 post = new Post();
+                post.setId(rs.getInt("id"));
                 post.setTitle(rs.getString("name"));
                 post.setDescription(rs.getString("text"));
                 post.setLink(rs.getString("link"));
@@ -139,6 +140,6 @@ public class PsqlStore implements Store, AutoCloseable {
         List<Post> first = new SqlRuParse().list("https://www.sql.ru/forum/job-offers");
         first.forEach(store::save);
         List<Post> second = store.getAll();
-        Post post = store.findById("10");
+        Post post = store.findById(String.valueOf(first.get(0).getId()));
     }
 }

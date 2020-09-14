@@ -10,6 +10,10 @@ import java.util.Date;
  */
 public class Post {
     /**
+     * Идентификатор вакансии.
+     */
+    private int id;
+    /**
      * Поле содержит заголовок вакансии.
      */
     private String title;
@@ -25,6 +29,22 @@ public class Post {
      * Поле содержит дату и время создания вакансии.
      */
     private Date date;
+
+    /**
+     * Метод возвращает идентификатор вакансии.
+     * @return Идентификатор
+     */
+    public int getId() {
+        return id;
+    }
+
+    /**
+     * Метод задает идентификатор вакансии.
+     * @param id Идентификатор
+     */
+    public void setId(int id) {
+        this.id = id;
+    }
 
     /**
      * Метод вовзращает название вакансии.
@@ -88,5 +108,19 @@ public class Post {
      */
     public void setDate(Date date) {
         this.date = date;
+    }
+
+    /**
+     * Метод преобразует класс в строку.
+     * @return Строка
+     */
+    @Override
+    public String toString() {
+        return  "Идентификатор вакансии: " + id + System.lineSeparator()
+                + "Наименование вакансии: " + title + System.lineSeparator()
+                + "Описание вакансии: " + System.lineSeparator() + description
+                + System.lineSeparator()
+                + "Ссылка на вакансию: " + link + System.lineSeparator()
+                + "Дата публикации: " + date;
     }
 }
