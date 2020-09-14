@@ -16,7 +16,7 @@ public interface Grab {
      * Метод определяет параметры запуска задачи парсинга сайта вакансий.
      * @param parse Объект осуществляющий парсинг сайта вакансий
      * @param store Хранилище, в которое сохраняются извлеченные объявления
-     * @param scheduler Объект определяющий время выполнения задачи
+     * @param scheduler Планировщик заданий
      * @throws SchedulerException Исключение
      */
     void init(Parse parse, Store store, Scheduler scheduler) throws SchedulerException;

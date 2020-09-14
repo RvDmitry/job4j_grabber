@@ -56,12 +56,8 @@ public class PsqlStore implements Store, AutoCloseable {
             st.executeUpdate();
             ResultSet rs = st.getGeneratedKeys();
             key = rs.next() ? rs.getInt(1) : 0;
-        } catch (SQLFeatureNotSupportedException e) {
-            e.printStackTrace();
-            throw new IllegalStateException("Сгенерированный базой ИД не может быть возвращен.");
         } catch (SQLException e) {
             e.printStackTrace();
-            throw new IllegalStateException("Ошибка записи в базу.");
         }
         return key;
     }
@@ -85,7 +81,6 @@ public class PsqlStore implements Store, AutoCloseable {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            throw new IllegalStateException("Ошибка поиска объявлений.");
         }
         return posts;
     }
@@ -111,7 +106,6 @@ public class PsqlStore implements Store, AutoCloseable {
             rs.close();
         } catch (Exception e) {
             e.printStackTrace();
-            throw new IllegalStateException("Ошибка поиска объявления.");
         }
         return post;
     }
