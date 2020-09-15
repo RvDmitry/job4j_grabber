@@ -100,8 +100,13 @@ public class Grabber implements Grab {
             JobDataMap map = context.getJobDetail().getJobDataMap();
             Store store = (Store) map.get("store");
             Parse parse = (Parse) map.get("parse");
-            List<Post> posts = parse.list("https://www.sql.ru/forum/job-offers");
-            posts.stream().filter(post -> post.getTitle().contains("Java")).forEach(store::save);
+            String url = "https://www.sql.ru/forum/job-offers/";
+            for (int i = 1; i <= 702; i++) {
+                List<Post> posts = parse.list(url + i);
+                posts.stream()
+                        .filter(post -> post.getTitle().contains("Java"))
+                        .forEach(store::save);
+            }
         }
     }
 
