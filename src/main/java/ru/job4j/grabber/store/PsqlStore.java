@@ -41,9 +41,10 @@ public class PsqlStore implements Store, AutoCloseable {
     /**
      * Метод сохраняет объявление в базе.
      * @param post Объявление
+     * @return Объявление
      */
     @Override
-    public void save(Post post) {
+    public Post save(Post post) {
         try (PreparedStatement st = cnn.prepareStatement(
                 "insert into posts(name, text, link, created) values(?, ?, ?, ?)",
                 Statement.RETURN_GENERATED_KEYS)) {
@@ -59,6 +60,7 @@ public class PsqlStore implements Store, AutoCloseable {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        return post;
     }
 
     /**

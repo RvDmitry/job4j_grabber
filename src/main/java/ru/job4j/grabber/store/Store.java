@@ -14,8 +14,9 @@ public interface Store {
     /**
      * Метод сохраняет объявление в базе.
      * @param post Объявление
+     * @return Объявление
      */
-    void save(Post post);
+    Post save(Post post);
 
     /**
      * Метод извлекает все объявления из базы.
